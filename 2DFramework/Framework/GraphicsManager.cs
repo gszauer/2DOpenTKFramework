@@ -18,7 +18,16 @@ namespace GameFramework {
 
         }
 
-        // TODO: Add Font Rendering!
+        // For font rendering
+        private int originalW = 0;
+        private int originalH = 0;
+        private int fontWidth = 0;
+        private int fontHeight = 0;
+        private int fontHandle = 0;
+        private int charWidth = 0;
+        private int charHeight = 0;
+
+        // TODO: Add Font DATA
 
         public float Depth {
             get {
@@ -154,14 +163,6 @@ namespace GameFramework {
             GL.End();
         }
 
-        int originalW = 0;
-        int originalH = 0;
-        int fontWidth = 0;
-        int fontHeight = 0;
-        int fontHandle = 0;
-        int charWidth = 0;
-        int charHeight = 0;
-
         public void DrawString(Point position, Color color, string str) {
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
@@ -169,38 +170,37 @@ namespace GameFramework {
 
             IncreaseDepth();
 
+            // TODO: ZDepth accurate text
             float charPieceX = ((float)originalW / (float)fontWidth) / 95.0f;
-            float[] vertices = new float[str.Length * 3 * 4];
+            float[] vertices = new float[str.Length * 2 * 4];
             float[] texcoords = new float[str.Length * 2 * 4];
             float[] colors = new float[str.Length * 3 * 4];
             for (int i = 0; i < str.Length * 4 * 3; i += 3) {
                 colors[i + 0] = (float)color.R / 255.0f;
                 colors[i + 1] = (float)color.G / 255.0f;
                 colors[i + 2] = (float)color.B / 255.0f;
-
-                // TODO: Move verts here
             }
             GL.BindTexture(TextureTarget.Texture2D, fontHandle);
 
-            for (int count = 0; count < str.Length; count++) { // TODO: Maybe keep z here?
+            for (int count = 0; count < str.Length; count++) { 
                 vertices[count * 2 * 4 + 0] = position.X + charWidth * count;
                 vertices[count * 2 * 4 + 1] = position.Y;
-                vertices[count * 2 * 4 + 1] = Depth;
+                //vertices[count * 2 * 4 + 1] = Depth;
                 texcoords[count * 2 * 4 + 0] = charPieceX * (str[count] - 32);
                 texcoords[count * 2 * 4 + 1] = 0.0f;
                 vertices[count * 2 * 4 + 2] = position.X + charWidth * count;
                 vertices[count * 2 * 4 + 3] = position.Y + charHeight;
-                vertices[count * 2 * 4 + 3] = Depth;
+                //vertices[count * 2 * 4 + 3] = Depth;
                 texcoords[count * 2 * 4 + 2] = charPieceX * (str[count] - 32);
                 texcoords[count * 2 * 4 + 3] = (float)originalH / (float)fontHeight;
                 vertices[count * 2 * 4 + 4] = position.X + charWidth * (count + 1);
                 vertices[count * 2 * 4 + 5] = position.Y + charHeight;
-                vertices[count * 2 * 4 + 5] = Depth;
+                //vertices[count * 2 * 4 + 5] = Depth;
                 texcoords[count * 2 * 4 + 4] = charPieceX * (str[count] - 32 + 1);
                 texcoords[count * 2 * 4 + 5] = (float)originalH / (float)fontHeight;
                 vertices[count * 2 * 4 + 6] = position.X + charWidth * (count + 1);
                 vertices[count * 2 * 4 + 7] = position.Y;
-                vertices[count * 2 * 4 + 7] = Depth;
+                //vertices[count * 2 * 4 + 7] = Depth;
                 texcoords[count * 2 * 4 + 6] = charPieceX * (str[count] - 32 + 1);
                 texcoords[count * 2 * 4 + 7] = 0.0f;
             }

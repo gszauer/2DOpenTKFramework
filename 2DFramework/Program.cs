@@ -1,101 +1,54 @@
 ﻿using System;
-using System.Drawing;
 using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
+using System.Drawing;
+using GameFramework;
 
-namespace GameFramework {
-    class MyApplication {
+namespace SomeNamespace {
+    class MainClass {
+        public static OpenTK.GameWindow Window = null;
+
+        public static void Initialize(object sender, EventArgs e) {
+            // INITIALIZE GAME
+        }
+
+        public static void Update(object sender, FrameEventArgs e) {
+            // UPDATE GAME
+        }
+
+        public static void Render(object sender, FrameEventArgs e) {
+            // RENDER GAME
+        }
+
+        public static void Shutdown(object sender, EventArgs e) {
+            // SHUTDOWN GAME
+        }
+
         [STAThread]
         public static void Main() {
-            using (Toolkit.Init(new ToolkitOptions { Backend = PlatformBackend.Default })) {
-                // here be games
+            // Create static (global) window instance
+            Window = new OpenTK.GameWindow();
 
-                using (var game = new GameWindow()) {
-                    GraphicsManager.Instance.Initialize(game);
-                    TextureManager.Instance.Initialize(game);
-                    SoundManager.Instance.Initialize(game);
-                    InputManager.Instance.Initialize(game);
+            // Hook up the initialize callback
+            Window.Load += new EventHandler<EventArgs>(Initialize);
+            // Hook up the update callback
+            Window.UpdateFrame += new EventHandler<FrameEventArgs>(Update);
+            // Hook up the render callback
+            Window.RenderFrame += new EventHandler<FrameEventArgs>(Render);
+            // Hook up the shutdown callback
+            Window.Unload += new EventHandler<EventArgs>(Shutdown);
 
-                    int tex1 = TextureManager.Instance.LoadTexture("C:/Users/gszauer/Desktop/icon-flareLargeBgColor.png");
-                    int tex2 = TextureManager.Instance.LoadTexture("C:/Users/Public/Pictures/11696.gif");
-                    int bgMusicId = SoundManager.Instance.LoadMp3("C:/Users/Public/Music/WarChild.mp3");
-                    int sfxID = SoundManager.Instance.LoadWav("C:/Users/Public/Music/M1F1-Alaw-AFsp.wav");
+            // Set window title and size
+            Window.Title = "Game Name";
+            Window.Size = new Size(800, 600);
 
-                    SoundManager.Instance.PlaySound(bgMusicId);
-                    float angle = 0.0f;
-                    float bgVolume = 1.0f;
+            // Run the game at 60 frames per second. This method will NOT return
+            // until the window is closed.
+            Window.Run(60.0f);
 
-
-                    game.UpdateFrame += (sender, e) => {
-                        InputManager.Instance.Update();
-
-                        if (game.Keyboard[Key.Escape]) {
-                            game.Exit();
-                        }
-
-                        if (game.Keyboard[Key.Q]) {
-                            if (!SoundManager.Instance.IsPlaying(sfxID)) {
-                                SoundManager.Instance.PlaySound(sfxID);
-                            }
-                        }
-
-                        if (game.Keyboard[Key.W]) {
-                            SoundManager.Instance.StopSound(bgMusicId);
-                        }
-
-                        if (game.Keyboard[Key.E]) {
-                            SoundManager.Instance.PlaySound(bgMusicId);
-                        }
-
-                        if (game.Keyboard[Key.A]) {
-                            bgVolume -= (1.0f / 60.0f);
-                            if (bgVolume < 0.0f) {
-                                bgVolume = 0.0f;
-                            }
-                            SoundManager.Instance.SetVolume(bgMusicId, bgVolume);
-                        }
-
-                        if (game.Keyboard[Key.S]) {
-                            bgVolume += (1.0f / 60.0f);
-                            if (bgVolume > 1.0f) {
-                                bgVolume = 1.0f;
-                            }
-                            SoundManager.Instance.SetVolume(bgMusicId, bgVolume);
-                        }
-
-                        if (game.Keyboard[Key.D]) {
-                            Console.WriteLine("BG Volume: " + SoundManager.Instance.GetVolume(bgMusicId));
-                        }
-
-                        if (InputManager.Instance.KeyPressed(Key.P)) {
-                            Console.WriteLine("Num game pads: " + InputManager.Instance.NumGamepads);
-                        }
-                    };
-
-                    game.RenderFrame += (sender, e) => {
-                        GraphicsManager.Instance.ClearScreen(Color.Yellow);
-
-                        GraphicsManager.Instance.DrawRect(new Rectangle(0, 0, 300, 300), Color.Blue);
-                        GraphicsManager.Instance.DrawRect(new Rectangle(150, 150, 300, 300), Color.Green);
-                        GraphicsManager.Instance.DrawRect(new Rectangle(300, 300, 300, 300), Color.Purple);
-                        GraphicsManager.Instance.DrawLine(new Point(0, 0), new Point(300, 300), Color.Red);
-                        TextureManager.Instance.Draw(tex1, new Point(200, 100), new PointF(0.5f, 0.5f));
-                        TextureManager.Instance.Draw(tex2, new Point(450, 300), 5.0f, new Rectangle(4, 987, 80, 76), angle);
-
-                        angle += 90.0f * (1.0f / 60.0f);
-                        if (angle >= 360.0f) {
-                            angle -= 360.0f;
-                        }
-
-                        GraphicsManager.Instance.SwapBuffers();
-                    };
-
-                    // Run the game at 60 updates per second
-                    game.Run(60.0);
-                }
-            }
+            // If we made it down here the window was closed. Call the windows
+            // Dispose method to free any resources that the window might hold
+            Window.Dispose();
         }
     }
 }
