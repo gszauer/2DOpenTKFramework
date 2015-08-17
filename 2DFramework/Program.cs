@@ -7,6 +7,9 @@ using GameFramework;
 namespace SomeNamespace {
     class MainClass {
         public static OpenTK.GameWindow Window = null;
+        static int numFrames = 0;
+        static double framesTime = 0.0;
+        static int frameRate = 0;
 
         public static void Initialize(object sender, EventArgs e) {
             // INITIALIZE GAME
@@ -43,7 +46,7 @@ namespace SomeNamespace {
 
             // Set window title and size
             Window.Title = "Game Name";
-            Window.Size = new Size(800, 600);
+            Window.ClientSize = new Size(800, 600);
 
             // Run the game at 60 frames per second. This method will NOT return
             // until the window is closed.

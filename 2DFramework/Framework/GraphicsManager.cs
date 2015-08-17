@@ -64,6 +64,7 @@ namespace GameFramework {
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.Enable(EnableCap.DepthTest);
+            GL.ClearColor(Color.CadetBlue);
 
             fontHandle = GetFontTexture();
 
@@ -78,12 +79,14 @@ namespace GameFramework {
             game.Resize += (sender, e) => {
                 SetScreenSize(game.Width, game.Height);
             };
+
         }
 
         public void Shutdown() {
             if (!isInitialized) {
                 Error("Trying to shut down a non initialized graphics manager!");
             }
+            GL.DeleteTexture(fontHandle);
             game = null;
             isInitialized = false;
         }
@@ -107,7 +110,6 @@ namespace GameFramework {
                 GL.ClearColor(clearColor);
             }
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            currentDepth = -1.0f;
         }
 
         public void SwapBuffers() {
@@ -116,6 +118,7 @@ namespace GameFramework {
             }
 
             game.SwapBuffers();
+            currentDepth = -1.0f;
         }
 
         public void IncreaseDepth() {
@@ -167,7 +170,18 @@ namespace GameFramework {
             GL.End();
         }
 
-        public void DrawString(Point position, Color color, string str) {
+        public void DrawString(string str, PointF position, Color color) {
+            if (!isInitialized) {
+                Error("Trying to draw line without intializing graphics manager!");
+            }
+
+            DrawString(str, new Point((int)position.X, (int)position.Y), color);
+        }
+
+        public void DrawString(string str, Point position, Color color) {
+            if (!isInitialized) {
+                Error("Trying to draw line without intializing graphics manager!");
+            }
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
             GL.LoadIdentity();
@@ -230,13 +244,15 @@ namespace GameFramework {
             int id = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, id);
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
             // Upload the image data to the GPU
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, fontWidth, fontHeight, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, FontData);
-            
-            FontData = null;
+
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            // FontData = null; // If we don't set this to null, then the game can re-init
             return id;
         }
 

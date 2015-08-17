@@ -104,7 +104,7 @@ Next, lets create the actual window. This needs to happen inside of the **Main**
 
             // Set window title and size
             Window.Title = "Game Name";
-            Window.Size = new Size(800, 600);
+            Window.ClientSize = new Size(800, 600);
 
             // Run the game at 60 frames per second. This method will NOT return
             // until the window is closed.
