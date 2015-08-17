@@ -26,6 +26,9 @@ namespace SomeNamespace {
 
         [STAThread]
         public static void Main() {
+            Console.WriteLine(sizeof(byte));
+            Console.WriteLine(sizeof(UInt16));
+
             // Create static (global) window instance
             Window = new OpenTK.GameWindow();
 

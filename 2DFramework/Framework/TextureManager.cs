@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define SAVE_PNG_BYTES
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using OpenTK.Graphics.OpenGL;
@@ -179,6 +180,30 @@ namespace GameFramework {
 
             // Upload the image data to the GPU
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp_data.Width, bmp_data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
+
+#if SAVE_PNG_BYTES
+            byte[] byteArray = new byte[bmp_data.Width * bmp_data.Height * 4];
+            System.Runtime.InteropServices.Marshal.Copy(bmp_data.Scan0, byteArray, 0, byteArray.Length);
+
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.Append("{\n");
+            for (int i = 0; i < byteArray.Length; ++i) {
+                sb.Append("0x");
+                sb.AppendFormat("{0:x2}", byteArray[i]);
+                if (i != byteArray.Length - 1) {
+                    sb.Append(", ");
+                }
+                if (i != 0 && i%16 == 0) {
+                    sb.Append("\n");
+                }
+            }
+            sb.Append("\n};");
+
+            string directory = System.IO.Path.GetDirectoryName(filename);
+            string file = System.IO.Path.GetFileNameWithoutExtension(filename);
+
+            System.IO.File.WriteAllText(directory + "/" + file + ".array", sb.ToString());
+#endif
 
             // Mark system memory eligable for GC
             bmp.UnlockBits(bmp_data);
