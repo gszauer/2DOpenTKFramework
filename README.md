@@ -113,8 +113,13 @@ Next, lets create the actual window. This needs to happen inside of the **Main**
             // If we made it down here the window was closed. Call the windows
             // Dispose method to free any resources that the window might hold
             Window.Dispose();
+#if DEBUG
+            Console.ReadLine();
+#endif
         }
 ```
+
+The #if DEBUG block is a bit unusual. It will make the console window stick around after the main window is closed. Usually this is not the behaviour we want, but it will make it easyer to catch errors later down the line.
 
 Not sure if it's even worth including here, but we just need to close the class and namespace
 

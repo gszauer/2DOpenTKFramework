@@ -400,8 +400,8 @@ namespace GameFramework {
             GraphicsManager.Instance.IncreaseDepth();
             GL.PushMatrix();
 
-            float left = 0.0f;
-            float top = 0.0f;
+            float left = 0;
+            float top = 0;
             float right = left + sourceSection.Width;
             float bottom = top + sourceSection.Height;
 
@@ -466,8 +466,8 @@ namespace GameFramework {
             GraphicsManager.Instance.IncreaseDepth();
             GL.PushMatrix();
 
-            float left = 0.0f;
-            float top = 0.0f;
+            float left = 0;
+            float top = 0;
             float right = left + sourceSection.Width;
             float bottom = top + sourceSection.Height;
 

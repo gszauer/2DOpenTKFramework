@@ -7,31 +7,63 @@ using GameFramework;
 namespace SomeNamespace {
     class MainClass {
         public static OpenTK.GameWindow Window = null;
-        static int numFrames = 0;
-        static double framesTime = 0.0;
-        static int frameRate = 0;
+
+        public static Rectangle body = new Rectangle(128, 0, 128, 128);
+        public static Rectangle head = new Rectangle(0, 64, 64, 64);
+        public static Rectangle leg = new Rectangle(64, 0, 64, 64);
+        public static Rectangle arm = new Rectangle(64, 0, 64, 64);
+        public static Rectangle bicep = new Rectangle(64, 64, 64, 64);
+        public static Rectangle hand = new Rectangle(0, 0, 64, 64);
+
+        public static int robot = -1;
+        public static float currentRotation = 0.0f;
 
         public static void Initialize(object sender, EventArgs e) {
-            // INITIALIZE GAME
+            GraphicsManager.Instance.Initialize(Window);
+            TextureManager.Instance.Initialize(Window);
+
+            robot = TextureManager.Instance.LoadTexture("Assets/BigRobot.png");
         }
 
         public static void Update(object sender, FrameEventArgs e) {
-            // UPDATE GAME
+            currentRotation += (float)e.Time * 30.0f;
+            while (currentRotation > 360.0f) {
+                currentRotation -= 360.0f;
+            }
         }
 
         public static void Render(object sender, FrameEventArgs e) {
-            // RENDER GAME
+            GraphicsManager.Instance.ClearScreen(Color.CadetBlue);
+            GraphicsManager g = GraphicsManager.Instance;
+            TextureManager t = TextureManager.Instance;
+
+            t.Draw(robot, new Point(320, 20));
+
+            t.Draw(robot, new Point(212, 85), 0.75f, leg);
+            t.Draw(robot, new Point(172, 85), new PointF(-0.75f, 0.75f), leg);
+            t.Draw(robot, new Point(128, 0), 1.0f, body);
+            t.Draw(robot, new Point(168, 31), 0.75f, head);
+            t.Draw(robot, new Point(219, 41), 0.75f, bicep);
+            t.Draw(robot, new Point(165, 41), new PointF(-0.75f, 0.75f), bicep);
+            t.Draw(robot, new Point(224, 111), new PointF(0.75f, -0.75f), arm);
+            t.Draw(robot, new Point(159, 111), 0.75f, arm, new Point(0, 0), 180.0f);
+            t.Draw(robot, new Point(226, 75), 0.75f, hand, currentRotation);
+            t.Draw(robot, new Point(157, 75), new PointF(-0.75f, 0.75f), hand, currentRotation);
+
+            GraphicsManager.Instance.SwapBuffers();
         }
 
         public static void Shutdown(object sender, EventArgs e) {
-            // SHUTDOWN GAME
+            TextureManager.Instance.UnloadTexture(robot);
+
+            robot = -1;
+
+            TextureManager.Instance.Shutdown();
+            GraphicsManager.Instance.Shutdown();
         }
 
         [STAThread]
         public static void Main() {
-            Console.WriteLine(sizeof(byte));
-            Console.WriteLine(sizeof(UInt16));
-
             // Create static (global) window instance
             Window = new OpenTK.GameWindow();
 
@@ -55,6 +87,10 @@ namespace SomeNamespace {
             // If we made it down here the window was closed. Call the windows
             // Dispose method to free any resources that the window might hold
             Window.Dispose();
+
+#if DEBUG
+            Console.ReadLine();
+#endif
         }
     }
 }
