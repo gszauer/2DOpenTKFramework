@@ -70,14 +70,14 @@ namespace GameFramework {
 
             isInitialized = true;
 
-            SetScreenSize(game.Width, game.Height);
+            SetScreenSize(game.ClientSize.Width, game.ClientSize.Height);
 
             game.Load += (sender, e) => {
                 game.VSync = OpenTK.VSyncMode.On;
             };
 
             game.Resize += (sender, e) => {
-                SetScreenSize(game.Width, game.Height);
+                SetScreenSize(game.ClientSize.Width, game.ClientSize.Height);
             };
 
         }

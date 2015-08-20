@@ -181,8 +181,8 @@ namespace GameFramework {
             }
             mousePosition.X = game.Mouse.X;
             mousePosition.Y = game.Mouse.Y;
-            mouseDeltaPos.X = ((float)game.Mouse.XDelta) / ((float)game.Width);
-            mouseDeltaPos.Y = ((float)game.Mouse.YDelta) / ((float)game.Height);
+            mouseDeltaPos.X = ((float)game.Mouse.XDelta) / ((float)game.ClientSize.Width);
+            mouseDeltaPos.Y = ((float)game.Mouse.YDelta) / ((float)game.ClientSize.Height);
             
             for (int i = 0; i < numJoysticks; ++i) {
                 if (IsConnected(i)) {
@@ -291,7 +291,9 @@ namespace GameFramework {
         }
 
         public void CenterMouse() {
-            OpenTK.Input.Mouse.SetPosition(((double)game.Width) / 2.0, ((double)game.Height / 2.0));
+            double x = game.X + game.Width / 2;
+            double y = game.Y + game.Height / 2;
+            OpenTK.Input.Mouse.SetPosition(x, y);
         }
 
         public float GetDeadzone(int controllerNum) {
