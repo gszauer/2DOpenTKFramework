@@ -72,9 +72,6 @@ namespace GameFramework {
             public bool HasLeftAxisY { get { return HasAxis[1]; } set { HasAxis[1] = value; } }
             public bool HasRightAxisX { get { return HasAxis[2]; } set { HasAxis[2] = value; } }
             public bool HasRightAxisY { get { return HasAxis[3]; } set { HasAxis[3] = value; } }
-
-            // TODO: ToString
-            // TODO: FromString
         }
 
         public class ControllerState {
@@ -130,16 +127,19 @@ namespace GameFramework {
 
         public void Initialize(OpenTK.GameWindow window) {
             game = window;
-            
-            prevKeysDown = new bool[game.Keyboard.NumberOfKeys];
-            curKeysDown = new bool[game.Keyboard.NumberOfKeys];
-            for (int i = 0; i < game.Keyboard.NumberOfKeys; ++i) {
+
+            int numKeys = (int)OpenTK.Input.Key.LastKey;
+            int numMouseButtons = (int)OpenTK.Input.MouseButton.LastButton;
+
+            prevKeysDown = new bool[numKeys];
+            curKeysDown = new bool[numKeys];
+            for (int i = 0; i < numKeys; ++i) {
                 prevKeysDown[i] = curKeysDown[i] = false;
             }
 
-            prevMouseDown = new bool[game.Mouse.NumberOfButtons];
-            curMouseDown = new bool[game.Mouse.NumberOfButtons];
-            for (int i = 0; i < game.Mouse.NumberOfButtons; ++i) {
+            prevMouseDown = new bool[numMouseButtons];
+            curMouseDown = new bool[numMouseButtons];
+            for (int i = 0; i < numMouseButtons; ++i) {
                 prevMouseDown[i] = curMouseDown[i] = false;
             }
 
@@ -152,7 +152,7 @@ namespace GameFramework {
                 joyMapping[i] = new ControllerMapping();
                 prevJoyDown[i] = new ControllerState();
                 curJoyDown[i] = new ControllerState();
-                joyDeadZone[i] = 0.0f;
+                joyDeadZone[i] = 0.25f;
             }
 
             isInitialized = true;
@@ -202,16 +202,31 @@ namespace GameFramework {
                     curJoyDown[i].RightAxis.X = joyMapping[i].HasRightAxisX ? state.GetAxis(joyMapping[i].RightAxisX) : 0.0f;
                     curJoyDown[i].RightAxis.Y = joyMapping[i].HasRightAxisY ? state.GetAxis(joyMapping[i].RightAxisY) : 0.0f;
 
-                    if (curJoyDown[i].LeftAxis.X < joyDeadZone[i]) {
+                    if (curJoyDown[i].LeftAxis.X > 0.0f && curJoyDown[i].LeftAxis.X < joyDeadZone[i]) {
                         curJoyDown[i].LeftAxis.X = 0.0f;
                     }
-                    if (curJoyDown[i].LeftAxis.Y < joyDeadZone[i]) {
+                    else if (curJoyDown[i].LeftAxis.X < 0.0f && curJoyDown[i].LeftAxis.X > -joyDeadZone[i]) {
+                        curJoyDown[i].LeftAxis.X = 0.0f;
+                    }
+
+                    if (curJoyDown[i].LeftAxis.Y > 0.0f && curJoyDown[i].LeftAxis.Y < joyDeadZone[i]) {
                         curJoyDown[i].LeftAxis.Y = 0.0f;
                     }
-                    if (curJoyDown[i].RightAxis.X < joyDeadZone[i]) {
+                    else if (curJoyDown[i].LeftAxis.Y < 0.0f && curJoyDown[i].LeftAxis.Y > -joyDeadZone[i]) {
+                        curJoyDown[i].LeftAxis.Y = 0.0f;
+                    }
+
+                    if (curJoyDown[i].RightAxis.X > 0.0f && curJoyDown[i].RightAxis.X < joyDeadZone[i]) {
                         curJoyDown[i].RightAxis.X = 0.0f;
                     }
-                    if (curJoyDown[i].RightAxis.Y < joyDeadZone[i]) {
+                    else if (curJoyDown[i].RightAxis.X < 0.0f && curJoyDown[i].RightAxis.X > -joyDeadZone[i]) {
+                        curJoyDown[i].RightAxis.X = 0.0f;
+                    }
+
+                    if (curJoyDown[i].RightAxis.Y > 0.0f && curJoyDown[i].RightAxis.Y < joyDeadZone[i]) {
+                        curJoyDown[i].RightAxis.Y = 0.0f;
+                    }
+                    else if (curJoyDown[i].RightAxis.Y < 0.0f && curJoyDown[i].RightAxis.Y > -joyDeadZone[i]) {
                         curJoyDown[i].RightAxis.Y = 0.0f;
                     }
                 }
@@ -232,6 +247,19 @@ namespace GameFramework {
 
         public bool KeyReleased(OpenTK.Input.Key key) {
             return prevKeysDown[(int)key] && (!curKeysDown[(int)key]);
+        }
+
+        public OpenTK.Input.Key[] GetAllKeysDown() {
+            System.Collections.Generic.List<Key> collection = new List<Key>();
+
+            for (int i = 0; i < curKeysDown.Length; ++i) {
+                if (curKeysDown[i]) {
+                    collection.Add((Key)i);
+                }
+            }
+
+            return collection.ToArray();
+
         }
 
         public bool MouseDown(OpenTK.Input.MouseButton button) {
@@ -296,44 +324,6 @@ namespace GameFramework {
             OpenTK.Input.Mouse.SetPosition(x, y);
         }
 
-        public float GetDeadzone(int controllerNum) {
-            return joyDeadZone[controllerNum];
-        }
-
-        public void SetDeadzone(int controller, float value) {
-            joyDeadZone[controller] = value;
-        }
-
-        public bool GetButton(int joystick, ref JoystickButton button) {
-            for (int i = 0; i < numJoysticks; ++i) {
-                if (IsConnected(i)) {
-                    JoystickState state = Joystick.GetState(i);
-                    foreach (JoystickButton enumVal in Enum.GetValues(typeof(JoystickButton))) {
-                        if (state.GetButton(enumVal) == ButtonState.Pressed) {
-                            button = enumVal;
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        public bool GetAxis(int joystick, JoystickAxis axis) {
-            for (int i = 0; i < numJoysticks; ++i) {
-                if (IsConnected(i)) {
-                    JoystickState state = Joystick.GetState(i);
-                    foreach (JoystickAxis enumVal in Enum.GetValues(typeof(JoystickAxis))) {
-                        if (state.GetAxis(enumVal) != 0.0f) { // TODO: Set this to be a deadzone
-                            axis = enumVal;
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
         public Dictionary<int, string> Gamepads {
             get {
                 Dictionary<int, string> result = new Dictionary<int, string>();
@@ -358,10 +348,10 @@ namespace GameFramework {
                     
                     if (caps.IsConnected) {
                         count += 1;
-                        Console.WriteLine("Joystick: " + i);
+                        /*Console.WriteLine("Joystick: " + i);
                         Console.WriteLine("\tDescription: " + game.Joysticks[i].Description);
                         Console.WriteLine("\tType: " + game.Joysticks[i].DeviceType);
-                        Console.WriteLine("\tString: " + game.Joysticks[i].ToString());
+                        Console.WriteLine("\tString: " + game.Joysticks[i].ToString());*/
                     }
                 }
                 
@@ -369,64 +359,132 @@ namespace GameFramework {
             }
         }
 
-        bool IsConnected(int padNum) {
+        public bool IsConnected(int padNum) {
             JoystickCapabilities caps = Joystick.GetCapabilities(padNum);
             return caps.IsConnected;
         }
 
-        bool HasAButton(int padNum) {
+        public float GetDeadzone(int controllerNum) {
+            return joyDeadZone[controllerNum];
+        }
+
+        public void SetDeadzone(int controller, float value) {
+            joyDeadZone[controller] = value;
+        }
+
+        public ControllerMapping GetMapping(int joyNum) {
+            return joyMapping[joyNum];
+        }
+
+        public bool GetButton(int joystick, ref JoystickButton button, params JoystickButton[] excludeButtons) {
+            for (int i = 0; i < numJoysticks; ++i) {
+                if (IsConnected(i)) {
+                    JoystickState state = Joystick.GetState(i);
+                    foreach (JoystickButton enumVal in Enum.GetValues(typeof(JoystickButton))) {
+                        if (state.GetButton(enumVal) == ButtonState.Pressed) {
+                            bool cont = false;
+                            foreach (JoystickButton exclude in excludeButtons) {
+                                if (exclude == enumVal) {
+                                    cont = true;
+                                    break;
+                                }
+                            }
+                            if (cont) {
+                                continue;
+                            }
+
+                            button = enumVal;
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        public bool GetAxis(int joystick, ref JoystickAxis axis, params JoystickAxis[] excludeAxis) {
+            for (int i = 0; i < numJoysticks; ++i) {
+                if (IsConnected(i)) {
+                    JoystickState state = Joystick.GetState(i);
+                    foreach (JoystickAxis enumVal in Enum.GetValues(typeof(JoystickAxis))) {
+                        
+                        bool greaterThan0 = Math.Abs(state.GetAxis(enumVal)) > GetDeadzone(joystick);
+                        bool lessThan1 = 1.0 - Math.Abs(state.GetAxis(enumVal)) > GetDeadzone(joystick);
+
+                        if (greaterThan0 && lessThan1) {
+                            bool cont = false;
+                            foreach (JoystickAxis exclude in excludeAxis) {
+                                if (exclude == enumVal) {
+                                    cont = true;
+                                    break;
+                                }
+                            }
+                            if (cont) {
+                                continue;
+                            }
+
+                            axis = enumVal;
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        public bool HasAButton(int padNum) {
             return joyMapping[padNum].HasA;
         }
 
-        bool HasBButton(int padNum) {
+        public bool HasBButton(int padNum) {
             return joyMapping[padNum].HasB;
         }
 
-        bool HasXButton(int padNum) {
+        public bool HasXButton(int padNum) {
             return joyMapping[padNum].HasX;
         }
 
-        bool HasYButton(int padNum) {
+        public bool HasYButton(int padNum) {
             return joyMapping[padNum].HasY;
         }
 
-        bool HasSelectButton(int padNum) {
+        public bool HasSelectButton(int padNum) {
             return joyMapping[padNum].HasSelect;
         }
 
-        bool HasStartButton(int padNum) {
+        public bool HasStartButton(int padNum) {
             return joyMapping[padNum].HasStart;
         }
 
-        bool HasHomeButton(int padNum) {
+        public bool HasHomeButton(int padNum) {
             return joyMapping[padNum].HasHome;
         }
 
-        bool HasDPad(int padNum) {
+        public bool HasDPad(int padNum) {
             return joyMapping[padNum].HasUp && joyMapping[padNum].HasDown && joyMapping[padNum].HasLeft && joyMapping[padNum].HasRight;
         }
 
-        bool HasL1(int padNum) {
+        public bool HasL1(int padNum) {
             return joyMapping[padNum].HasL1;
         }
 
-        bool HasL2(int padNum) {
+        public bool HasL2(int padNum) {
             return joyMapping[padNum].HasL2;
         }
 
-        bool HasR1(int padNum) {
+        public bool HasR1(int padNum) {
             return joyMapping[padNum].HasR1;
         }
 
-        bool HasR2(int padNum) {
+        public bool HasR2(int padNum) {
             return joyMapping[padNum].HasR2;
         }
 
-        bool HasLeftStick(int padNum) {
+        public bool HasLeftStick(int padNum) {
             return joyMapping[padNum].HasLeftAxisX && joyMapping[padNum].HasLeftAxisY;
         }
 
-        bool HasRightStick(int padNum) {
+        public bool HasRightStick(int padNum) {
             return joyMapping[padNum].HasRightAxisX && joyMapping[padNum].HasRightAxisY;
         }       
 
