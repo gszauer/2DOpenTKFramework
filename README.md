@@ -1,9 +1,13 @@
 #Getting set up
-Lets implement this framework in your own project. [TODO: Details]
+Visual studio has a built in [Package Manager](https://en.wikipedia.org/wiki/Package_manager) called [NuGet](https://www.nuget.org/). NuGet allows you to easily install 3rd party (Not written by you or microsoft) library code to help with common tasks. We are going to be utilizing two of these packages, **OpenTK** for hardware accelerated rendering and **NAudio** for loading MP3's. Once you add a package to your visual studio project it behaves exactly like adding a reference (Like we did for windows forms)
 
-* TODO: What packages are and which ones we use
-* TODO: OpenTK and windowing
-* TODO: What the managers do
+Because we are going to be using **OpenTK** for hardware accelerated rendering, we can no longer use **WinForms** to create our window. OpenTK actually comes with several ways to create and manage multiple windows, we wil be using it's built in functions.
+
+While **OpenTK** and **NAudio** are needed for your project to compile, you will not be using either of them directly. This framework provides several managers that wrap the functionality of the libraries into easy to use functions for you, the point of the managers is to allow you to focus on making a game, without having to worry about the infrastructure code below it.
+
+In essence, this is a lot like the support classes we wrote for **WinformsGames**, except you don't need to write the boiler plate code, i did that for you. If you are interested in what the code does, you do have full source access. Feel free to take a look and ask me any questions you may have.
+
+Having said all that, let's see how to implement this and make a blank window pop up in your own project.
 
 #Create project
 * Open up **Visual Studio** and make a new _"Console Application"_ project.
@@ -73,6 +77,7 @@ Next, let's add some stock functions to Initialize, Update, Render and Shutdown 
         }
 
         public static void Update(object sender, FrameEventArgs e) {
+			float deltaTime = (float)e.Time;
             // UPDATE GAME
         }
 
@@ -136,3 +141,7 @@ If all is well, now you should be able to run your program. You should get a con
 We have a window, so what next? Go to the [repository wiki](https://github.com/gszauer/2DOpenTKFramework/wiki) for detailed instructions on how to set up and use the framework managers.
 
 ![WIKI](https://dl.dropboxusercontent.com/u/48598159/wiki_how.png)
+
+Follow the links on the sidebar in order, you will make a visual studio solution with many projects in it, this is all outlined on the "Introduction" page of the wii
+
+![SIDEBAR](https://dl.dropboxusercontent.com/u/48598159/sidebar.png)
