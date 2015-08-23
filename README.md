@@ -12,7 +12,7 @@ Having said all that, let's see how to implement this and make a blank window po
 #OpenAL
 The framework uses OpenAL to play audio. OpenAL is not something that is installed on your system by default, the installer is included in this repository as ```OpenALDriver.zip```, you can also download it from [the official OpenAL website](https://www.openal.org/downloads/)
 
-Anyone playing your games will also need to have OpenAL installed. We will talk about how to bundle OpenAL with your installer at a later point.
+Anyone playing your games will also need to have OpenAL installed. We will talk about how to bundle OpenAL with your installer at a later point, for now just have it installed on your machine.
 
 #Create project
 * Open up **Visual Studio** and make a new _"Console Application"_ project.
