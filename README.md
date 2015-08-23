@@ -9,6 +9,11 @@ In essence, this is a lot like the support classes we wrote for **WinformsGames*
 
 Having said all that, let's see how to implement this and make a blank window pop up in your own project.
 
+#OpenAL
+The framework uses OpenAL to play audio. OpenAL is not something that is installed on your system by default, the installer is included in this repository as ```OpenALDriver.zip```, you can also download it from [the official OpenAL website](https://www.openal.org/downloads/)
+
+Anyone playing your games will also need to have OpenAL installed. We will talk about how to bundle OpenAL with your installer at a later point.
+
 #Create project
 * Open up **Visual Studio** and make a new _"Console Application"_ project.
 
