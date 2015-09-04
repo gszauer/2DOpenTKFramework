@@ -1,4 +1,4 @@
-﻿//#define SAVE_PNG_BYTES
+//#define SAVE_PNG_BYTES
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -31,6 +31,11 @@ namespace GameFramework {
         // Helper used to warn if any method is called without first
         // intilizing the manager
         private bool isInitialized = false;
+
+        // If set to true, sprites will resize using nearest neighbor algorithm
+        // nearest neighor = blocky. If false, the resized sprite will become
+        // anti aliased.
+        public bool UseNearestFiltering = false;
 
         // The ONLY instance of TextureManager. No class outside of the
         // manager can access this instance. This variable, the Instance getter
@@ -138,7 +143,7 @@ namespace GameFramework {
         // We really only need a reference to the texture on the GPU, as everything we do is going to
         // be hardware accelerated (happen on the GPU). The function will return a handle to the GPU
         // instance of the texture, as well as the width and height f the texutre
-        private int LoadGLTexture(string filename, out int width, out int height) {
+        private int LoadGLTexture(string filename, out int width, out int height, bool nearest) {
             if (string.IsNullOrEmpty(filename)) {
                 Error("Load texture file path was null");
                 throw new ArgumentException(filename);
@@ -152,9 +157,14 @@ namespace GameFramework {
             // Ming & Mag filters are needed to figure out how to interpolate scaling. If you don't 
             // provide them the GPU will not draw your texture. Trilinear is the nicest looking,
             // but most expensive. Linear is kind of standard.
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-
+            if (nearest) {
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            }
+            else {
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            }
             // Allocate system memory for the image
             Bitmap bmp = new Bitmap(filename);
             // Load the image into system memory
@@ -236,7 +246,7 @@ namespace GameFramework {
             for (int i = 0; i < managedTextures.Count; ++i) {
                 if (managedTextures[i].refCount <= 0) {
                     GL.DeleteTexture(managedTextures[i].glHandle);
-                    managedTextures[i].glHandle = LoadGLTexture(texturePath, out managedTextures[i].width, out managedTextures[i].height);
+                    managedTextures[i].glHandle = LoadGLTexture(texturePath, out managedTextures[i].width, out managedTextures[i].height, UseNearestFiltering);
                     managedTextures[i].refCount = 1;
                     managedTextures[i].path = texturePath;
                     return i;
@@ -248,7 +258,7 @@ namespace GameFramework {
             // and add it to the managed textures vector
             TextureInstance newTexture = new TextureInstance();
             newTexture.refCount = 1;
-            newTexture.glHandle = LoadGLTexture(texturePath, out newTexture.width, out newTexture.height);
+            newTexture.glHandle = LoadGLTexture(texturePath, out newTexture.width, out newTexture.height, UseNearestFiltering);
             newTexture.path = texturePath;
             managedTextures.Add(newTexture);
             return managedTextures.Count - 1;
@@ -393,7 +403,7 @@ namespace GameFramework {
 
         // Given a texture id, draw a sub-section of that texture at the specified screen position 
         // and possibly scale it. This will not draw the whole texture, just a specific rectangle form it
-        public void Draw(int textureId, Point screenPosition, PointF scale,  Rectangle sourceSection) {
+        public void Draw(int textureId, Point screenPosition, PointF scale, Rectangle sourceSection) {
             if (!isInitialized) {
                 Error("Trying to draw texture without intializing texture manager!");
             }
@@ -437,7 +447,7 @@ namespace GameFramework {
         // and possibly scale it. This will not draw the whole texture, just a specific rectangle form it.
         // The resulting image can then be rotated about it's center by any angle.
         public void Draw(int textureId, Point screenPosition, float scale, Rectangle sourceSection, float rotation) {
-            Point rotationCenter  = new Point(sourceSection.Width / 2, sourceSection.Height / 2);
+            Point rotationCenter = new Point(sourceSection.Width / 2, sourceSection.Height / 2);
             Draw(textureId, screenPosition, new PointF(scale, scale), sourceSection, rotationCenter, rotation);
         }
 
@@ -486,7 +496,7 @@ namespace GameFramework {
 
             GL.Translate(((float)rotationCenter.X) * scale.X, ((float)rotationCenter.Y) * scale.Y, 0.0f);
             GL.Rotate(rotation, 0.0f, 0.0f, 1.0f);
-            GL.Translate(-((float)rotationCenter.X) * scale.X, -((float)rotationCenter.Y)  * scale.Y, 0.0f);
+            GL.Translate(-((float)rotationCenter.X) * scale.X, -((float)rotationCenter.Y) * scale.Y, 0.0f);
 
             GL.Scale(scale.X, scale.Y, 1.0f);
 
