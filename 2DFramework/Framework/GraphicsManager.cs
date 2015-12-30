@@ -1,9 +1,6 @@
 using System;
 using System.Drawing;
-using System.Drawing.Imaging;
 using OpenTK.Graphics.OpenGL;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace GameFramework {
     public class GraphicsManager {
@@ -32,82 +29,17 @@ namespace GameFramework {
         private int charHeight = 15; // Pixel height of each character
         private int fontHandle = 0; // Hardware accelerated font handle
 
-        private float zNear = -1.0f;
-        private float zFar = 1.0f;
-        private float depthStepValue = 0.05f;
-
-        // http://stackoverflow.com/questions/24266815/render-the-depth-buffer-in-opengl-without-shaders
-        public Image GetDepthBuffer() {
-            List<byte> bgra = new List<byte>();
-            float[] pixels = new float[game.ClientSize.Width * game.ClientSize.Height];
-            
-
-            GL.ReadPixels<float>(0, 0, game.ClientSize.Width, game.ClientSize.Height, OpenTK.Graphics.OpenGL.PixelFormat.DepthComponent, PixelType.Float, pixels);
-
-            // Get min max range
-            float min = pixels[0];
-            float max = pixels[0];
-
-            for (int i = 0; i < pixels.Length; ++i) {
-                if (pixels[i] < min) {
-                    min = pixels[i];
-                }
-                if (pixels[i] > max) {
-                    max = pixels[i];
-                }
-            }
-
-
-            // Linearize: http://www.geeks3d.com/20091216/geexlab-how-to-visualize-the-depth-buffer-in-glsl/
-            for (int i = 0; i < pixels.Length; ++i) {
-                //pixels[i] = (2.0f * zNear) / (zFar + zNear - pixels[i] * (zFar - zNear));
-
-                // http://stackoverflow.com/questions/10376600/normalizing-a-list-of-doubles-to-range-1-to-1-or-0-255
-                pixels[i] = (pixels[i] - min) / (max - min);
-
-                float depthComponent = Math.Min(1.0f, Math.Max(0.0f, pixels[i]));
-                byte colorComponent = System.Convert.ToByte(depthComponent *255.0f);
-
-                bgra.Add(colorComponent);
-                bgra.Add(colorComponent);
-                bgra.Add(colorComponent);
-                bgra.Add(255);
-            }
-
-            return ImageFromRawBgraArray(bgra.ToArray(), game.ClientSize.Width, game.ClientSize.Height);
-        }
-
-        // http://stackoverflow.com/questions/9173904/bytearray-to-image-conversion
-        public static Image ImageFromRawBgraArray(byte[] arr, int width, int height) {
-            var output = new Bitmap(width, height);
-            var rect = new Rectangle(0, 0, width, height);
-            var bmpData = output.LockBits(rect, ImageLockMode.ReadWrite, output.PixelFormat);
-            var ptr = bmpData.Scan0;
-            Marshal.Copy(arr, 0, ptr, arr.Length);
-            output.UnlockBits(bmpData);
-            output.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipY);
-            return output;
-        }
-
-        public void SetDepthRange(float near, float far) {
-            zNear = near;
-            zFar = far;
-        }
+        // TODO: Add Font DATsA
 
         public float Depth {
             get {
-                float depth = (currentDepth - zNear) / (zFar - zNear);
-                depth = 1.0f - (2.0f * depth);
-                depth -= 0.0001f;
-
-                return depth;
+                return currentDepth;
             }
         }
 
         private Color lastClear = Color.Red;
         private OpenTK.GameWindow game = null;
-        private float currentDepth = 0.0f; // Overwritter in initialize!
-        private float depthStep = 0.0f; // Override on init
+        private float currentDepth = -1.0f;
         private bool isInitialized = false;
 
         private void Error(string error) {
@@ -126,8 +58,6 @@ namespace GameFramework {
             GL.LoadIdentity();
             lastClear = Color.CadetBlue;
             game = window;
-            currentDepth = zNear;
-            depthStep = depthStepValue;
 
             GL.Enable(EnableCap.Texture2D);
             GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -135,9 +65,6 @@ namespace GameFramework {
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.Enable(EnableCap.DepthTest);
             GL.ClearColor(Color.CadetBlue);
-
-            //GL.AlphaFunc(AlphaFunction.Greater, 0.1f);
-            //GL.Enable(EnableCap.AlphaTest);
 
             fontHandle = GetFontTexture();
 
@@ -170,7 +97,7 @@ namespace GameFramework {
             }
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
-            GL.Ortho(0, width, height, 0, 1.0f, -1.0f);
+            GL.Ortho(0, width, height, 0, -1.0, 1.0);
             GL.Viewport(0, 0, width, height);
             GL.MatrixMode(MatrixMode.Modelview);
         }
@@ -191,49 +118,17 @@ namespace GameFramework {
             }
 
             game.SwapBuffers();
-            currentDepth = zNear;
-        }
-
-        public void SetDepth(float depth) {
-            if (!isInitialized) {
-                Error("Trying to increase depth without intializing graphics manager!");
-            }
-            currentDepth = depth;
-            depthStep = 0.0f;
-            if (currentDepth > zFar) {
-                currentDepth = zFar;
-            }
-            else if (currentDepth < zNear) {
-                currentDepth = zNear;
-            }
-        }
-
-        public void IncreaseDepth(float step) {
-            if (!isInitialized) {
-                Error("Trying to increase depth without intializing graphics manager!");
-            }
-            currentDepth += step;
-            depthStep = 0;
-            if (currentDepth > zFar) {
-                currentDepth = zFar;
-            }
-            else if (currentDepth < zNear) {
-                currentDepth = zNear;
-            }
+            currentDepth = -1.0f;
         }
 
         public void IncreaseDepth() {
             if (!isInitialized) {
                 Error("Trying to increase depth without intializing graphics manager!");
             }
-            currentDepth += depthStep;
-            if (currentDepth > zFar) {
-                currentDepth = zFar;
+            currentDepth += 0.0005f;
+            if (currentDepth > 1.0f) {
+                currentDepth = 1.0f;
             }
-            else if (currentDepth < zNear) {
-                currentDepth = zNear;
-            }
-            depthStep = depthStepValue;
         }
 
         public void DrawRect(Rectangle rect, Color c) {
@@ -255,10 +150,10 @@ namespace GameFramework {
 
             GL.Color3(c.R, c.G, c.B);
             GL.Begin(PrimitiveType.Quads);
-            GL.Vertex3(rect.X, rect.Y + rect.Height, Depth);
-            GL.Vertex3(rect.X + rect.Width, rect.Y + rect.Height, Depth);
-            GL.Vertex3(rect.X + rect.Width, rect.Y, Depth);
-            GL.Vertex3(rect.X, rect.Y, Depth);
+            GL.Vertex3(rect.X, rect.Y + rect.Height, currentDepth);
+            GL.Vertex3(rect.X + rect.Width, rect.Y + rect.Height, currentDepth);
+            GL.Vertex3(rect.X + rect.Width, rect.Y, currentDepth);
+            GL.Vertex3(rect.X, rect.Y, currentDepth);
             GL.End();
         }
 
@@ -270,8 +165,8 @@ namespace GameFramework {
 
             GL.Color3(c.R, c.G, c.B);
             GL.Begin(PrimitiveType.Lines);
-            GL.Vertex3(p1.X, p1.Y, Depth);
-            GL.Vertex3(p2.X, p2.Y, Depth);
+            GL.Vertex3(p1.X, p1.Y, currentDepth);
+            GL.Vertex3(p2.X, p2.Y, currentDepth);
             GL.End();
         }
 
@@ -314,7 +209,7 @@ namespace GameFramework {
                 texcoords[count * 2 * 4 + 1] = 0.0f;
                 vertices[vertex++] = position.X + charWidth * count;
                 vertices[vertex++] = position.Y + charHeight;
-                vertices[vertex++] = Depth ;
+                vertices[vertex++] = Depth;
                 texcoords[count * 2 * 4 + 2] = charPieceX * (str[count] - 32);
                 texcoords[count * 2 * 4 + 3] = (float)originalH / (float)fontHeight;
                 vertices[vertex++] = position.X + charWidth * (count + 1);
