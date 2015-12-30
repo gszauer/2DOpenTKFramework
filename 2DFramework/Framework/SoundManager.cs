@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenTK.Audio;
 using NAudio.Wave;
 using OpenTK.Audio.OpenAL;
@@ -131,7 +131,7 @@ namespace GameFramework {
 
             for (int i = 0; i < managedSounds.Count; ++i) {
                 if (managedSounds[i].refCount <= 0) {
-                    StopSound(managedSounds[i].bufferHandle);
+                    StopSound(i);
                     AL.DeleteBuffer(managedSounds[i].bufferHandle);
                     managedSounds[i].bufferHandle = AL.GenBuffer();
                     managedSounds[i].refCount = 1;
