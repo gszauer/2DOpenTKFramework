@@ -18,18 +18,14 @@ namespace GameFramework {
 
         }
 
-        // For font rendering, the font was rendered to a texture
-        // using the SDL framework, then padded up to the nearest
-        // (non square) power of two for more efficient rendering
-        private int originalW = 855; // Width of SDL font texutre
-        private int originalH = 15; // Height of SDL font texture
+        // The actual font texture is embeded in code. It is mono-space.
+        private int originalW = 855; // Width of font texutre
+        private int originalH = 15; // Height of font texture
         private int fontWidth = 1024; // Padded width of font texture
         private int fontHeight = 16; // Padded height of font texture
         private int charWidth = 9; // Pixel width of each character
         private int charHeight = 15; // Pixel height of each character
         private int fontHandle = 0; // Hardware accelerated font handle
-
-        // TODO: Add Font DATsA
 
         public float Depth {
             get {
