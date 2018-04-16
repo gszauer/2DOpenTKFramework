@@ -24,16 +24,8 @@ Anyone playing your games will also need to have OpenAL installed. We will talk 
 
 * Right click on the project name (PROJECT, not solution)
 * Select the **Manage NuGet Packages...** option, you will be greated with this window
-
-![Package Manager](https://dl.dropboxusercontent.com/u/48598159/howto_package.png)
-
 * Search for and install **OpenTK**
-
-![OpenTK](https://dl.dropboxusercontent.com/u/48598159/otk_inst.png)
-
 * Search for and install **NAudio**
-
-![NAudio](https://dl.dropboxusercontent.com/u/48598159/naudui_inst.png)
 
 # Add references
 We have to add a reference to System.Drawing to our project.
@@ -42,8 +34,6 @@ We have to add a reference to System.Drawing to our project.
 * Search for **System.Drawing**
 * Select the entry, and check the box next to it
 * Then click ok
-
-![Drawing](https://dl.dropboxusercontent.com/u/48598159/sysdraw.png)
 
 # Add files
 You need to add the following files from this repository to your project
@@ -144,13 +134,7 @@ Not sure if it's even worth including here, but we just need to close the class 
 
 If all is well, now you should be able to run your program. You should get a console and a window. The contents of that window depends on your graphics driver, it may be black, white or it may just contain garbage. This is what mine looks like:
 
-![Win Sample](https://dl.dropboxusercontent.com/u/48598159/result.png)
-
 # Next steps
 We have a window, so what next? Go to the [repository wiki](https://github.com/gszauer/2DOpenTKFramework/wiki) for detailed instructions on how to set up and use the framework managers.
 
-![WIKI](https://dl.dropboxusercontent.com/u/48598159/wiki_how.png)
-
-Follow the links on the sidebar in order, you will make a visual studio solution with many projects in it, this is all outlined on the "Introduction" page of the wii
-
-![SIDEBAR](https://dl.dropboxusercontent.com/u/48598159/sidebar.png)
+Follow the links on the sidebar in order, you will make a visual studio solution with many projects in it, this is all outlined on the "Introduction" page of the wiki
