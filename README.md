@@ -1,4 +1,5 @@
-#Getting set up
+# Getting set up
+
 Visual studio has a built in [Package Manager](https://en.wikipedia.org/wiki/Package_manager) called [NuGet](https://www.nuget.org/). NuGet allows you to easily install 3rd party (Not written by you or microsoft) library code to help with common tasks. We are going to be utilizing two of these packages, **OpenTK** for hardware accelerated rendering and **NAudio** for loading MP3's. Once you add a package to your visual studio project it behaves exactly like adding a reference (Like we did for windows forms)
 
 Because we are going to be using **OpenTK** for hardware accelerated rendering, we can no longer use **WinForms** to create our window. OpenTK actually comes with several ways to create and manage multiple windows, we wil be using it's built in functions.
@@ -9,15 +10,18 @@ In essence, this is a lot like the support classes we wrote for **WinformsGames*
 
 Having said all that, let's see how to implement this and make a blank window pop up in your own project.
 
-#OpenAL
+# OpenAL
+
 The framework uses OpenAL to play audio. OpenAL is not something that is installed on your system by default, the installer is included in this repository as ```OpenALDriver.zip```, you can also download it from [the official OpenAL website](https://www.openal.org/downloads/)
 
 Anyone playing your games will also need to have OpenAL installed. We will talk about how to bundle OpenAL with your installer at a later point, for now just have it installed on your machine.
 
-#Create project
+# Create project
+
 * Open up **Visual Studio** and make a new _"Console Application"_ project.
 
-#Add packages
+# Add packages
+
 * Right click on the project name (PROJECT, not solution)
 * Select the **Manage NuGet Packages...** option, you will be greated with this window
 
@@ -31,7 +35,7 @@ Anyone playing your games will also need to have OpenAL installed. We will talk 
 
 ![NAudio](https://dl.dropboxusercontent.com/u/48598159/naudui_inst.png)
 
-#Add references
+# Add references
 We have to add a reference to System.Drawing to our project.
 
 * Under your PROJECT right click **References**
@@ -41,7 +45,7 @@ We have to add a reference to System.Drawing to our project.
 
 ![Drawing](https://dl.dropboxusercontent.com/u/48598159/sysdraw.png)
 
-#Add files
+# Add files
 You need to add the following files from this repository to your project
 
 * [2DFramework/Framework/GraphicsManager.cs](2DFramework/Framework/GraphicsManager.cs)
@@ -51,7 +55,7 @@ You need to add the following files from this repository to your project
 
 How you get them into your project is up to you. I do suggest placing them all in a folder called **Framework** to keep these seperate from your files.
 
-#Main file
+# Main file
 Now that we have all the project dependencies in place it's time to implement the main file. This is the place where the window is created. Let's see how to implement a minimalistic version.
 
 We will be using the following namespaces:
@@ -142,7 +146,7 @@ If all is well, now you should be able to run your program. You should get a con
 
 ![Win Sample](https://dl.dropboxusercontent.com/u/48598159/result.png)
 
-#Next steps
+# Next steps
 We have a window, so what next? Go to the [repository wiki](https://github.com/gszauer/2DOpenTKFramework/wiki) for detailed instructions on how to set up and use the framework managers.
 
 ![WIKI](https://dl.dropboxusercontent.com/u/48598159/wiki_how.png)
