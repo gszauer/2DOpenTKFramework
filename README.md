@@ -53,7 +53,7 @@ We will be using the following namespaces:
 ```
 using System; // Important things
 using OpenTK; // For windowing
-using OpenTK.Input; // To get they Key enumeration
+using OpenTK.Input; // To get the Key enumeration
 using System.Drawing; // For coors
 using GameFramework; // For the 2D game framework
 ```
